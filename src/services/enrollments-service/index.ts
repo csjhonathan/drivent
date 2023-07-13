@@ -72,10 +72,21 @@ export type CreateOrUpdateEnrollmentWithAddress = CreateEnrollmentParams & {
   address: CreateAddressParams;
 };
 
+async function getUserEnrollment(userId: number) {
+  const userEnrollment = await enrollmentRepository.getUserEnrollment(userId);
+  if (!userEnrollment) {
+    throw {
+      name: 'NotFoundError',
+      message: 'Enrollment not found',
+    };
+  }
+  return userEnrollment;
+}
 const enrollmentsService = {
   getOneWithAddressByUserId,
   createOrUpdateEnrollmentWithAddress,
   getAddressFromCEP,
+  getUserEnrollment,
 };
 
 export default enrollmentsService;
