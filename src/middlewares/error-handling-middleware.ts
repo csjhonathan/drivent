@@ -48,5 +48,6 @@ export function handleApplicationErrors(
   res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
     error: 'InternalServerError',
     message: 'Internal Server Error',
+    data: err,
   });
 }
