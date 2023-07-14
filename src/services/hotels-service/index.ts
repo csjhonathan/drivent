@@ -35,16 +35,16 @@ async function getHotelWithRoomsById(userId: number, hotelId: number) {
     updatedAt: updatedAt.toISOString(),
     Rooms:
       Rooms.length > 0
-        ? [
-            {
-              id: Rooms[0].id,
-              name: Rooms[0].name,
-              capacity: Rooms[0].capacity,
-              hotelId: Rooms[0].hotelId,
-              createdAt: Rooms[0].createdAt.toISOString(),
-              updatedAt: Rooms[0].updatedAt.toISOString(),
-            },
-          ]
+        ? Rooms.map(({ id, name, capacity, hotelId, createdAt, updatedAt }) => {
+            return {
+              id: id,
+              name: name,
+              capacity: capacity,
+              hotelId: hotelId,
+              createdAt: createdAt.toISOString(),
+              updatedAt: updatedAt.toISOString(),
+            };
+          })
         : [],
   };
 }

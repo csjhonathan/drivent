@@ -107,14 +107,16 @@ describe('GET /hotels', () => {
       expect(statusCode).toEqual(httpStatus.PAYMENT_REQUIRED);
     });
 
-    it('should respond with status the list of hotels available on success', async () => {
+    it('should respond with status 200 and the list of hotels available', async () => {
       const user = await createUser();
       const token = await generateValidToken(user);
 
       const enrollment = await createEnrollmentWithAddress(user);
       const ticketType = await createTicketTypeWithHotel();
       await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
-      await createHotelsWithRooms();
+      for (let i = 0; i < 5; i++) {
+        await createHotelsWithRooms();
+      }
       const { statusCode, body } = await server.get('/hotels').set('Authorization', `Bearer ${token}`);
 
       expect(statusCode).toEqual(httpStatus.OK);
@@ -200,7 +202,7 @@ describe('GET /hotels/:id', () => {
 
       const enrollment = await createEnrollmentWithAddress(user);
       const ticketType = await createTicketTypeRemote();
-      await createTicket(enrollment.id, ticketType.id, TicketStatus.RESERVED);
+      await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
       const hotel = await createHotelsWithRooms();
       const { statusCode } = await server.get(`/hotels/${hotel.id + 1}`).set('Authorization', `Bearer ${token}`);
 
@@ -213,14 +215,14 @@ describe('GET /hotels/:id', () => {
 
       const enrollment = await createEnrollmentWithAddress(user);
       const ticketType = await createTicketTypeWithoutHotel();
-      await createTicket(enrollment.id, ticketType.id, TicketStatus.RESERVED);
+      await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
       const hotel = await createHotelsWithRooms();
       const { statusCode } = await server.get(`/hotels/${hotel.id}`).set('Authorization', `Bearer ${token}`);
 
       expect(statusCode).toEqual(httpStatus.PAYMENT_REQUIRED);
     });
 
-    it('should respond 200 with the hotel with empty array if hotel have no rooms', async () => {
+    it('should respond with status 200 and the hotel with empty rooms array if hotel have no rooms', async () => {
       const user = await createUser();
       const token = await generateValidToken(user);
 
@@ -243,7 +245,7 @@ describe('GET /hotels/:id', () => {
       );
     });
 
-    it('should respond 200 with the hotel with room list', async () => {
+    it('should respond with status 200 and the hotel with room list', async () => {
       const user = await createUser();
       const token = await generateValidToken(user);
 
@@ -251,13 +253,15 @@ describe('GET /hotels/:id', () => {
       const ticketType = await createTicketTypeWithHotel();
       await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
       const hotel = await createHotelsWithRooms();
-      const room = await createHotelRooms(hotel.id);
+      for (let i = 0; i < 5; i++) {
+        await createHotelRooms(hotel.id);
+      }
       const { statusCode, body: hotelWithRooms } = await server
         .get(`/hotels/${hotel.id}`)
         .set('Authorization', `Bearer ${token}`);
 
       expect(statusCode).toEqual(httpStatus.OK);
-
+      expect(hotelWithRooms.Rooms).toHaveLength(5);
       expect(hotelWithRooms).toEqual(
         expect.objectContaining({
           id: hotel.id,
@@ -265,16 +269,16 @@ describe('GET /hotels/:id', () => {
           image: hotel.image,
           createdAt: hotel.createdAt.toISOString(),
           updatedAt: hotel.updatedAt.toISOString(),
-          Rooms: [
-            {
-              id: room.id,
-              name: room.name,
-              capacity: room.capacity,
-              hotelId: room.hotelId,
-              createdAt: room.createdAt.toISOString(),
-              updatedAt: room.updatedAt.toISOString(),
-            },
-          ],
+          Rooms: expect.arrayContaining([
+            expect.objectContaining({
+              id: expect.any(Number),
+              name: expect.any(String),
+              capacity: expect.any(Number),
+              hotelId: expect.any(Number),
+              createdAt: expect.any(String),
+              updatedAt: expect.any(String),
+            }),
+          ]),
         }),
       );
     });
