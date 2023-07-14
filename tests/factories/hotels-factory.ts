@@ -2,7 +2,7 @@ import faker from '@faker-js/faker';
 import { prisma } from '@/config';
 
 export async function createHotelsWithRooms() {
-  return await prisma.hotel.create({
+  const hotel = await prisma.hotel.create({
     data: {
       name: faker.commerce.department(),
       image: faker.image.imageUrl(),
@@ -13,4 +13,5 @@ export async function createHotelsWithRooms() {
       Rooms: true,
     },
   });
+  return hotel;
 }

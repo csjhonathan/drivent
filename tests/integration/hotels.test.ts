@@ -219,7 +219,7 @@ describe('GET /hotels/:id', () => {
       expect(statusCode).toEqual(httpStatus.PAYMENT_REQUIRED);
     });
 
-    it('should respond with the hotel with the list of rooms', async () => {
+    it('should respond with the hotel with empty array if hotel have no rooms', async () => {
       const user = await createUser();
       const token = await generateValidToken(user);
 
@@ -229,19 +229,7 @@ describe('GET /hotels/:id', () => {
       const hotel = await createHotelsWithRooms();
       const { statusCode, body } = await server.get(`/hotels/${hotel.id}`).set('Authorization', `Bearer ${token}`);
 
-      console.log(body);
       expect(statusCode).toEqual(httpStatus.OK);
-      // expect(body).toEqual(
-      //   expect.arrayContaining([
-      //     expect.objectContaining({
-      //       id: expect.any(Number),
-      //       name: expect.any(String),
-      //       image: expect.any(String),
-      //       createdAt: expect.any(String),
-      //       updatedAt: expect.any(String),
-      //     }),
-      //   ]),
-      // );
     });
   });
 });

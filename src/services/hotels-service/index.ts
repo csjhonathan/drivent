@@ -1,5 +1,4 @@
 import enrollmentsService from '../enrollments-service';
-import ticketService from '../tickets-service';
 import { notFoundError } from '@/errors';
 import { paymentRequired } from '@/errors/payment-required-error';
 import hotelsRepository from '@/repositories/hotels-repository';
