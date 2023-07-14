@@ -5,6 +5,7 @@ import supertest from 'supertest';
 import { cleanDb, generateValidToken } from '../helpers';
 import {
   createEnrollmentWithAddress,
+  createHotelRooms,
   createHotelsWithRooms,
   createTicket,
   createTicketTypeRemote,
@@ -230,6 +231,49 @@ describe('GET /hotels/:id', () => {
       const { statusCode, body } = await server.get(`/hotels/${hotel.id}`).set('Authorization', `Bearer ${token}`);
 
       expect(statusCode).toEqual(httpStatus.OK);
+      expect(body).toEqual(
+        expect.objectContaining({
+          id: hotel.id,
+          name: hotel.name,
+          image: hotel.image,
+          createdAt: hotel.createdAt.toISOString(),
+          updatedAt: hotel.updatedAt.toISOString(),
+          Rooms: [],
+        }),
+      );
+    });
+
+    it('should respond with the hotel with room list', async () => {
+      const user = await createUser();
+      const token = await generateValidToken(user);
+
+      const enrollment = await createEnrollmentWithAddress(user);
+      const ticketType = await createTicketTypeWithHotel();
+      await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
+      const hotel = await createHotelsWithRooms();
+      const room = await createHotelRooms(hotel.id);
+      const { statusCode, body } = await server.get(`/hotels/${hotel.id}`).set('Authorization', `Bearer ${token}`);
+
+      expect(statusCode).toEqual(httpStatus.OK);
+      expect(body).toEqual(
+        expect.objectContaining({
+          id: hotel.id,
+          name: hotel.name,
+          image: hotel.image,
+          createdAt: hotel.createdAt.toISOString(),
+          updatedAt: hotel.updatedAt.toISOString(),
+          Rooms: [
+            {
+              id: room.id,
+              name: room.name,
+              capacity: room.capacity,
+              hotelId: hotel.id,
+              createdAt: room.createdAt.toISOString(),
+              updatedAt: room.updatedAt.toISOString(),
+            },
+          ],
+        }),
+      );
     });
   });
 });
