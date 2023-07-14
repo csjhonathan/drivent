@@ -2,6 +2,7 @@ import faker from '@faker-js/faker';
 import { TicketStatus } from '@prisma/client';
 import httpStatus from 'http-status';
 import supertest from 'supertest';
+import * as jwt from 'jsonwebtoken';
 import { cleanDb, generateValidToken } from '../helpers';
 import {
   createEnrollmentWithAddress,
@@ -26,20 +27,30 @@ beforeEach(async () => {
 const server = supertest(app);
 
 describe('GET /hotels', () => {
-  it('Should respond with status 401 when sending invalid token', async () => {
-    const token = faker.word.adjective();
+  describe('when token is invalid', () => {
+    it('Should respond with status 401 when sending invalid token', async () => {
+      const token = faker.word.adjective();
 
-    const { statusCode } = await server.get('/hotels').set('Authorization', `Bearer ${token}`);
+      const { statusCode } = await server.get('/hotels').set('Authorization', `Bearer ${token}`);
 
-    expect(httpStatus.UNAUTHORIZED).toBe(statusCode);
+      expect(httpStatus.UNAUTHORIZED).toBe(statusCode);
+    });
+
+    it('Should respond with status 401 when not sending a token', async () => {
+      const { statusCode } = await server.get('/hotels');
+
+      expect(httpStatus.UNAUTHORIZED).toBe(statusCode);
+    });
+
+    it('should respond with status 401 if there is no session for given token', async () => {
+      const userWithoutSession = await createUser();
+      const token = jwt.sign({ userId: userWithoutSession.id }, process.env.JWT_SECRET);
+
+      const response = await server.get('/enrollments').set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).toBe(httpStatus.UNAUTHORIZED);
+    });
   });
-
-  it('Should respond with status 401 when not sending a token', async () => {
-    const { statusCode } = await server.get('/hotels');
-
-    expect(httpStatus.UNAUTHORIZED).toBe(statusCode);
-  });
-
   describe('when token is valid', () => {
     it('should respond with status 404 when user doesnt have an enrollment yet', async () => {
       const token = await generateValidToken();
@@ -89,7 +100,7 @@ describe('GET /hotels', () => {
 
       const enrollment = await createEnrollmentWithAddress(user);
       const ticketType = await createTicketTypeRemote();
-      await createTicket(enrollment.id, ticketType.id, TicketStatus.RESERVED);
+      await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
       const { statusCode } = await server.get('/hotels').set('Authorization', `Bearer ${token}`);
 
       expect(statusCode).toEqual(httpStatus.PAYMENT_REQUIRED);
@@ -101,7 +112,7 @@ describe('GET /hotels', () => {
 
       const enrollment = await createEnrollmentWithAddress(user);
       const ticketType = await createTicketTypeWithoutHotel();
-      await createTicket(enrollment.id, ticketType.id, TicketStatus.RESERVED);
+      await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
       const { statusCode } = await server.get('/hotels').set('Authorization', `Bearer ${token}`);
 
       expect(statusCode).toEqual(httpStatus.PAYMENT_REQUIRED);
@@ -136,19 +147,30 @@ describe('GET /hotels', () => {
 });
 
 describe('GET /hotels/:id', () => {
-  it('Should respond with status 401 when sending invalid token', async () => {
-    const token = faker.word.adjective();
-    const id = faker.datatype.number({ min: 1, max: 10 });
-    const { statusCode } = await server.get(`/hotels/${id}`).set('Authorization', `Bearer ${token}`);
+  describe('when token is invalid', () => {
+    it('Should respond with status 401 when sending invalid token', async () => {
+      const token = faker.word.adjective();
+      const id = faker.datatype.number({ min: 1, max: 10 });
+      const { statusCode } = await server.get(`/hotels/${id}`).set('Authorization', `Bearer ${token}`);
 
-    expect(httpStatus.UNAUTHORIZED).toBe(statusCode);
-  });
+      expect(httpStatus.UNAUTHORIZED).toBe(statusCode);
+    });
 
-  it('Should respond with status 401 when not sending a token', async () => {
-    const id = faker.datatype.number({ min: 1, max: 10 });
-    const { statusCode } = await server.get(`/hotels/${id}`);
+    it('Should respond with status 401 when not sending a token', async () => {
+      const id = faker.datatype.number({ min: 1, max: 10 });
+      const { statusCode } = await server.get(`/hotels/${id}`);
 
-    expect(httpStatus.UNAUTHORIZED).toBe(statusCode);
+      expect(httpStatus.UNAUTHORIZED).toBe(statusCode);
+    });
+
+    it('should respond with status 401 if there is no session for given token', async () => {
+      const userWithoutSession = await createUser();
+      const token = jwt.sign({ userId: userWithoutSession.id }, process.env.JWT_SECRET);
+
+      const response = await server.get('/enrollments').set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).toBe(httpStatus.UNAUTHORIZED);
+    });
   });
 
   describe('when token is valid', () => {
