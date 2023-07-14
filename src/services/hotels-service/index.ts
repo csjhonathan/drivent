@@ -26,8 +26,27 @@ async function getHotelWithRoomsById(userId: number, hotelId: number) {
 
   const hotelWithRooms = await hotelsRepository.getHotelWithRoomsById(hotelId);
   if (!hotelWithRooms) throw notFoundError();
-  // const { id, name, image, createdAt, updatedAt, Rooms } = hotelWithRooms;
-  return hotelWithRooms;
+  const { id, name, image, createdAt, updatedAt, Rooms } = hotelWithRooms;
+  return {
+    id,
+    name,
+    image,
+    createdAt: createdAt.toISOString(),
+    updatedAt: updatedAt.toISOString(),
+    Rooms:
+      Rooms.length > 0
+        ? [
+            {
+              id: Rooms[0].id,
+              name: Rooms[0].name,
+              capacity: Rooms[0].capacity,
+              hotelId: Rooms[0].hotelId,
+              createdAt: Rooms[0].createdAt.toISOString(),
+              updatedAt: Rooms[0].updatedAt.toISOString(),
+            },
+          ]
+        : [],
+  };
 }
 const hotelsService = {
   getAllHotels,

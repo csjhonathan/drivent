@@ -1,4 +1,4 @@
-import { Payment, Ticket } from '@prisma/client';
+import { Hotel, Payment, Room, Ticket } from '@prisma/client';
 
 export type ApplicationError = {
   name: string;

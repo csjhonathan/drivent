@@ -251,7 +251,7 @@ describe('GET /hotels/:id', () => {
       const ticketType = await createTicketTypeWithHotel();
       await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
       const hotel = await createHotelsWithRooms();
-      await createHotelRooms(hotel.id);
+      const room = await createHotelRooms(hotel.id);
       const { statusCode, body: hotelWithRooms } = await server
         .get(`/hotels/${hotel.id}`)
         .set('Authorization', `Bearer ${token}`);
@@ -260,19 +260,19 @@ describe('GET /hotels/:id', () => {
 
       expect(hotelWithRooms).toEqual(
         expect.objectContaining({
-          id: hotelWithRooms.id,
-          name: hotelWithRooms.name,
-          image: hotelWithRooms.image,
-          createdAt: hotelWithRooms.createdAt,
-          updatedAt: hotelWithRooms.updatedAt,
+          id: hotel.id,
+          name: hotel.name,
+          image: hotel.image,
+          createdAt: hotel.createdAt.toISOString(),
+          updatedAt: hotel.updatedAt.toISOString(),
           Rooms: [
             {
-              id: hotelWithRooms.Rooms[0].id,
-              name: hotelWithRooms.Rooms[0].name,
-              capacity: hotelWithRooms.Rooms[0].capacity,
-              hotelId: hotelWithRooms.Rooms[0].hotelId,
-              createdAt: hotelWithRooms.Rooms[0].createdAt,
-              updatedAt: hotelWithRooms.Rooms[0].updatedAt,
+              id: room.id,
+              name: room.name,
+              capacity: room.capacity,
+              hotelId: room.hotelId,
+              createdAt: room.createdAt.toISOString(),
+              updatedAt: room.updatedAt.toISOString(),
             },
           ],
         }),
