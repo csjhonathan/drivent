@@ -9,3 +9,14 @@ export async function getAllHotels(req: AuthenticatedRequest, res: Response) {
 
   res.send(hotels).status(httpStatus.OK);
 }
+
+type AuthenticatedRequestWithParam = AuthenticatedRequest & { params: { hotelId: number } };
+
+export async function getHotelWithRoomsById(req: AuthenticatedRequestWithParam, res: Response) {
+  const { hotelId } = req.params;
+  const { userId } = req;
+
+  const hotelWithRooms = await hotelsService.getHotelWithRoomsById(userId, hotelId);
+
+  res.send(hotelWithRooms).status(httpStatus.OK);
+}
