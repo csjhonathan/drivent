@@ -7,15 +7,17 @@ import ticketsRepository from '@/repositories/tickets-repository';
 
 async function getAllHotels(userId: number) {
   const enrollment = await enrollmentsService.getUserEnrollment(userId);
-  const ticket = await ticketService.getTicketByUserId(userId);
+  if (!enrollment) throw notFoundError();
+
+  const ticket = await ticketsRepository.findTicketByEnrollmentId(enrollment.id);
+  if (!ticket) throw notFoundError();
+
+  const { isRemote, includesHotel } = ticket.TicketType;
+  const notPaid = ticket.status === 'RESERVED';
+  if (!includesHotel || isRemote || notPaid) throw paymentRequired();
+
   const hotels = await hotelsRepository.getAllHotels();
-
-  if (!ticket || !enrollment || !hotels || !hotels.length) throw notFoundError();
-
-  const ticketWithType = await ticketsRepository.findTickeWithTypeById(ticket.id);
-  const { includesHotel, isRemote } = ticketWithType.TicketType;
-
-  if (!includesHotel || isRemote || ticket.status !== 'PAID') throw paymentRequired();
+  if (!hotels || !hotels.length) throw notFoundError();
 
   return hotels;
 }
