@@ -79,3 +79,50 @@ describe('GET /booking', () => {
     });
   });
 });
+
+describe('POST /booking', () => {
+  describe('when token is invalid', () => {
+    it('Should respond with status 401 when sending invalid token', async () => {
+      const token = faker.word.adjective();
+
+      const { statusCode } = await server.post('/booking').set('Authorization', `Bearer ${token}`);
+
+      expect(httpStatus.UNAUTHORIZED).toBe(statusCode);
+    });
+
+    it('Should respond with status 401 when not sending a token', async () => {
+      const { statusCode } = await server.post('/booking');
+
+      expect(httpStatus.UNAUTHORIZED).toBe(statusCode);
+    });
+
+    it('should respond with status 401 if there is no session for given token', async () => {
+      const userWithoutSession = await createUser();
+      const token = jwt.sign({ userId: userWithoutSession.id }, process.env.JWT_SECRET);
+
+      const response = await server.post('/enrollments').set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).toBe(httpStatus.UNAUTHORIZED);
+    });
+  });
+
+  describe('when token is valid', () => {
+    it('Should return status 200 and booking id on success', async () => {
+      const user = await createUser();
+      const token = await generateValidToken(user);
+      const enrollment = await createEnrollmentWithAddress(user);
+      const ticketType = await createTicketTypeWithHotel();
+      await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
+      const hotel = await createHotelsWithRooms();
+      const room = await createHotelRooms(hotel.id);
+
+      const { statusCode, body } = await server
+        .post('/booking')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ roomId: room.id });
+
+      expect(statusCode).toBe(httpStatus.OK);
+      expect(body).toEqual({ bookingId: expect.any(Number) });
+    });
+  });
+});
