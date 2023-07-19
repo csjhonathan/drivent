@@ -1,8 +1,8 @@
-import { TicketStatus, TicketType } from '@prisma/client';
+import { TicketStatus } from '@prisma/client';
 import { prisma } from '@/config';
 import { CreateTicketParams } from '@/protocols';
 
-async function findTicketTypes(): Promise<TicketType[]> {
+async function findTicketTypes() {
   return prisma.ticketType.findMany();
 }
 

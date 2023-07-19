@@ -42,6 +42,7 @@ describe('POST booking service test', () => {
       name: 'NotFoundError',
       message: 'No result for this search!',
     });
+    expect(roomsMock).toBeCalledTimes(1);
   });
 
   it('Should return forbiddenError if user ticket is remote', () => {
@@ -192,7 +193,7 @@ describe('POST booking service test', () => {
     });
 
     expect(roomsMock).toBeCalledTimes(1);
-    // expect(enrollmentMock).toBeCalledTimes(1);
-    // expect(ticketsMock).toBeCalledTimes(1);
+    // expect(enrollmentMock).toBeCalledTimes(0);
+    // expect(ticketsMock).toBeCalledTimes(0);
   });
 });

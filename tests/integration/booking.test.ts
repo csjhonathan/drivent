@@ -124,5 +124,22 @@ describe('POST /booking', () => {
       expect(statusCode).toBe(httpStatus.OK);
       expect(body).toEqual({ bookingId: expect.any(Number) });
     });
+
+    it('should Return status 403 if room has no vacancies', async () => {
+      const user = await createUser();
+      const token = await generateValidToken(user);
+      const enrollment = await createEnrollmentWithAddress(user);
+      const ticketType = await createTicketTypeWithHotel();
+      await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
+      const hotel = await createHotelsWithRooms();
+      const room = await createHotelRooms(hotel.id, 0);
+
+      const { statusCode } = await server
+        .post('/booking')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ roomId: room.id });
+
+      expect(statusCode).toBe(httpStatus.FORBIDDEN);
+    });
   });
 });

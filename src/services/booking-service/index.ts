@@ -14,10 +14,14 @@ async function findBookingByUserId(userId: number) {
 }
 async function createBooking(roomId: number, userId: number) {
   const room = await roomsRepository.findRoomById(roomId);
+
   if (!room) throw notFoundError();
+  if (!room.capacity) throw forbiddenError();
+
   const enrollment = await enrollmentRepository.getUserEnrollment(userId);
   const ticket = await ticketsRepository.findTicketByEnrollmentId(enrollment.id);
-  if (!room.capacity || ticket.TicketType.isRemote || !ticket.TicketType.includesHotel || ticket.status !== 'PAID') {
+
+  if (ticket.TicketType.isRemote || !ticket.TicketType.includesHotel || ticket.status !== 'PAID') {
     throw forbiddenError();
   }
 
