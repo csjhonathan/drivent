@@ -13,6 +13,11 @@ async function findBookingByUserId(userId: number) {
   return booking;
 }
 async function createBooking(roomId: number, userId: number) {
+  await validateBooking(roomId, userId);
+  return await bookingRepository.createBooking(roomId, userId);
+}
+
+async function validateBooking(roomId: number, userId: number) {
   const room = await roomsRepository.findRoomById(roomId);
 
   if (!room) throw notFoundError();
@@ -24,12 +29,20 @@ async function createBooking(roomId: number, userId: number) {
   if (ticket.TicketType.isRemote || !ticket.TicketType.includesHotel || ticket.status !== 'PAID') {
     throw forbiddenError();
   }
+}
 
-  return await bookingRepository.createBooking(roomId, userId);
+async function updateBooking(roomId: number, userId: number, bookingId: number) {
+  const booking = await bookingRepository.findBookingByUserId(userId);
+
+  if (!booking) throw forbiddenError();
+  await validateBooking(roomId, userId);
+
+  return await bookingRepository.updateBooking(roomId, bookingId);
 }
 const bookingService = {
   findBookingByUserId,
   createBooking,
+  updateBooking,
 };
 
 export default bookingService;
