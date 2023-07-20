@@ -21,7 +21,7 @@ async function validateBooking(roomId: number, userId: number) {
   const room = await roomsRepository.findRoomById(roomId);
 
   if (!room) throw notFoundError();
-  if (!room.capacity) throw forbiddenError();
+  if (room.capacity < 1) throw forbiddenError();
 
   const enrollment = await enrollmentRepository.getUserEnrollment(userId);
   const ticket = await ticketsRepository.findTicketByEnrollmentId(enrollment.id);

@@ -45,7 +45,7 @@ describe('POST booking service test', () => {
     expect(roomsMock).toBeCalledTimes(1);
   });
 
-  it('Should return forbiddenError if user ticket is remote', () => {
+  it('Should return forbiddenError if user ticket is remote', async () => {
     const roomsMock = jest.spyOn(roomsRepository, 'findRoomById');
     roomsMock.mockImplementationOnce((roomId: number): any => {
       return {
@@ -73,17 +73,17 @@ describe('POST booking service test', () => {
     const userId = faker.datatype.number({ min: 1 });
     const promise = bookingService.createBooking(roomId, userId);
 
-    expect(promise).rejects.toEqual({
+    await expect(promise).rejects.toEqual({
       name: 'ForbiddenError',
       message: 'Access denied!',
     });
 
     expect(roomsMock).toBeCalledTimes(1);
-    // expect(enrollmentMock).toBeCalledTimes(1);
-    // expect(ticketsMock).toBeCalledTimes(1);
+    expect(enrollmentMock).toBeCalledTimes(1);
+    expect(ticketsMock).toBeCalledTimes(1);
   });
 
-  it('Should return forbiddenError if user ticket does not include hotel', () => {
+  it('Should return forbiddenError if user ticket does not include hotel', async () => {
     const roomsMock = jest.spyOn(roomsRepository, 'findRoomById');
     roomsMock.mockImplementationOnce((roomId: number): any => {
       return {
@@ -111,17 +111,17 @@ describe('POST booking service test', () => {
     const userId = faker.datatype.number({ min: 1 });
     const promise = bookingService.createBooking(roomId, userId);
 
-    expect(promise).rejects.toEqual({
+    await expect(promise).rejects.toEqual({
       name: 'ForbiddenError',
       message: 'Access denied!',
     });
 
     expect(roomsMock).toBeCalledTimes(1);
-    // expect(enrollmentMock).toBeCalledTimes(1);
-    // expect(ticketsMock).toBeCalledTimes(1);
+    expect(enrollmentMock).toBeCalledTimes(1);
+    expect(ticketsMock).toBeCalledTimes(1);
   });
 
-  it('Should return forbiddenError if user ticket has not been paid', () => {
+  it('Should return forbiddenError if user ticket has not been paid', async () => {
     const roomsMock = jest.spyOn(roomsRepository, 'findRoomById');
     roomsMock.mockImplementationOnce((roomId: number): any => {
       return {
@@ -149,14 +149,14 @@ describe('POST booking service test', () => {
     const userId = faker.datatype.number({ min: 1 });
     const promise = bookingService.createBooking(roomId, userId);
 
-    expect(promise).rejects.toEqual({
+    await expect(promise).rejects.toEqual({
       name: 'ForbiddenError',
       message: 'Access denied!',
     });
 
     expect(roomsMock).toBeCalledTimes(1);
-    // expect(enrollmentMock).toBeCalledTimes(1);
-    // expect(ticketsMock).toBeCalledTimes(1);
+    expect(enrollmentMock).toBeCalledTimes(1);
+    expect(ticketsMock).toBeCalledTimes(1);
   });
 
   it('Should return forbiddenError if if room has no vacancies', () => {
@@ -164,22 +164,6 @@ describe('POST booking service test', () => {
     roomsMock.mockImplementationOnce((roomId: number): any => {
       return {
         capacity: 0,
-      };
-    });
-
-    const enrollmentMock = jest.spyOn(enrollmentRepository, 'getUserEnrollment');
-    enrollmentMock.mockImplementationOnce((userId: number): any => {
-      return { id: 1 };
-    });
-
-    const ticketsMock = jest.spyOn(ticketsRepository, 'findTicketByEnrollmentId');
-    ticketsMock.mockImplementationOnce((enrollmentId: number): any => {
-      return {
-        status: 'PAID',
-        TicketType: {
-          isRemote: false,
-          includesHotel: true,
-        },
       };
     });
 
@@ -193,7 +177,5 @@ describe('POST booking service test', () => {
     });
 
     expect(roomsMock).toBeCalledTimes(1);
-    // expect(enrollmentMock).toBeCalledTimes(0);
-    // expect(ticketsMock).toBeCalledTimes(0);
   });
 });
