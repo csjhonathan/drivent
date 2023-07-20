@@ -8,20 +8,8 @@ async function findRoomById(id: number) {
   });
 }
 
-async function updateRoomCapacity(id: number, entry: boolean) {
-  return await prisma.room.update({
-    data: {
-      capacity: entry ? { decrement: 1 } : { increment: 1 },
-    },
-    where: {
-      id,
-    },
-  });
-}
-
 const roomsRepository = {
   findRoomById,
-  updateRoomCapacity,
 };
 
 export default roomsRepository;

@@ -49,8 +49,13 @@ describe('POST booking service test', () => {
     const roomsMock = jest.spyOn(roomsRepository, 'findRoomById');
     roomsMock.mockImplementationOnce((roomId: number): any => {
       return {
-        capacity: faker.datatype.number({ min: 1 }),
+        capacity: 5,
       };
+    });
+
+    const bookingMock = jest.spyOn(bookingRepository, 'countBookingsByRoomId');
+    bookingMock.mockImplementation((roomId: number): any => {
+      return 1;
     });
 
     const enrollmentMock = jest.spyOn(enrollmentRepository, 'getUserEnrollment');
@@ -87,10 +92,13 @@ describe('POST booking service test', () => {
     const roomsMock = jest.spyOn(roomsRepository, 'findRoomById');
     roomsMock.mockImplementationOnce((roomId: number): any => {
       return {
-        capacity: faker.datatype.number({ min: 1 }),
+        capacity: 5,
       };
     });
-
+    const bookingMock = jest.spyOn(bookingRepository, 'countBookingsByRoomId');
+    bookingMock.mockImplementation((roomId: number): any => {
+      return 1;
+    });
     const enrollmentMock = jest.spyOn(enrollmentRepository, 'getUserEnrollment');
     enrollmentMock.mockImplementationOnce((userId: number): any => {
       return { id: 1 };
@@ -125,10 +133,13 @@ describe('POST booking service test', () => {
     const roomsMock = jest.spyOn(roomsRepository, 'findRoomById');
     roomsMock.mockImplementationOnce((roomId: number): any => {
       return {
-        capacity: faker.datatype.number({ min: 1 }),
+        capacity: 5,
       };
     });
-
+    const bookingMock = jest.spyOn(bookingRepository, 'countBookingsByRoomId');
+    bookingMock.mockImplementation((roomId: number): any => {
+      return 1;
+    });
     const enrollmentMock = jest.spyOn(enrollmentRepository, 'getUserEnrollment');
     enrollmentMock.mockImplementationOnce((userId: number): any => {
       return { id: 1 };
@@ -163,8 +174,13 @@ describe('POST booking service test', () => {
     const roomsMock = jest.spyOn(roomsRepository, 'findRoomById');
     roomsMock.mockImplementationOnce((roomId: number): any => {
       return {
-        capacity: 0,
+        capacity: 4,
       };
+    });
+
+    const bookingMock = jest.spyOn(bookingRepository, 'countBookingsByRoomId');
+    bookingMock.mockImplementation((roomId: number): any => {
+      return 4;
     });
 
     const roomId = faker.datatype.number({ min: 1 });

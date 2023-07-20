@@ -21,7 +21,7 @@ async function createBooking(roomId: number, userId: number) {
   });
 }
 
-export async function updateBooking(roomId: number, id: number) {
+async function updateBooking(roomId: number, id: number) {
   return await prisma.booking.update({
     data: {
       roomId,
@@ -32,10 +32,15 @@ export async function updateBooking(roomId: number, id: number) {
     },
   });
 }
+
+async function countBookingsByRoomId(roomId: number) {
+  return await prisma.booking.count({ where: { roomId } });
+}
 const bookingRepository = {
   findBookingByUserId,
   createBooking,
   updateBooking,
+  countBookingsByRoomId,
 };
 
 export default bookingRepository;

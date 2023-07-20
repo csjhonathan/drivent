@@ -133,13 +133,14 @@ describe('POST /booking', () => {
       const ticketType = await createTicketTypeWithHotel();
       await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
       const hotel = await createHotelsWithRooms();
-      const roomWithOneVacancie = await createHotelRooms(hotel.id, 1);
-      await updateRoomCapacity(roomWithOneVacancie.id, true);
-      await createBooking(roomWithOneVacancie.id, user.id);
+      const roomWithoutVacancie = await createHotelRooms(hotel.id, 4);
+      for (let i = 0; i < 4; i++) {
+        await createBooking(roomWithoutVacancie.id, user.id);
+      }
       const { statusCode } = await server
         .post('/booking')
         .set('Authorization', `Bearer ${token}`)
-        .send({ roomId: roomWithOneVacancie.id });
+        .send({ roomId: roomWithoutVacancie.id });
 
       expect(statusCode).toBe(httpStatus.FORBIDDEN);
     });
@@ -201,9 +202,10 @@ describe('PUT /booking', () => {
       await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
       const hotel = await createHotelsWithRooms();
       const room1 = await createHotelRooms(hotel.id);
-      const room2 = await createHotelRooms(hotel.id, 0);
       const booking = await createBooking(room1.id, user.id);
-      await updateRoomCapacity(room1.id, true);
+      const room2 = await createHotelRooms(hotel.id, 2);
+      await createBooking(room2.id, user.id);
+      await createBooking(room2.id, user.id);
 
       const { statusCode } = await server
         .put(`/booking/${booking.id}`)
