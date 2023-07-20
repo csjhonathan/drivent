@@ -12,3 +12,14 @@ export async function createHotelRooms(hotelId: number, capacity?: number) {
     },
   });
 }
+
+export async function updateRoomCapacity(id: number, entry: boolean) {
+  return await prisma.room.update({
+    data: {
+      capacity: entry ? { decrement: 1 } : { increment: 1 },
+    },
+    where: {
+      id,
+    },
+  });
+}

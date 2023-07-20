@@ -11,6 +11,7 @@ import {
   createTicket,
   createTicketTypeWithHotel,
   createUser,
+  updateRoomCapacity,
 } from '../factories';
 import { createBooking } from '../factories/booking-factory';
 import app, { init } from '@/app';
@@ -132,12 +133,13 @@ describe('POST /booking', () => {
       const ticketType = await createTicketTypeWithHotel();
       await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
       const hotel = await createHotelsWithRooms();
-      const room = await createHotelRooms(hotel.id, 0);
-
+      const roomWithOneVacancie = await createHotelRooms(hotel.id, 1);
+      await updateRoomCapacity(roomWithOneVacancie.id, true);
+      await createBooking(roomWithOneVacancie.id, user.id);
       const { statusCode } = await server
         .post('/booking')
         .set('Authorization', `Bearer ${token}`)
-        .send({ roomId: room.id });
+        .send({ roomId: roomWithOneVacancie.id });
 
       expect(statusCode).toBe(httpStatus.FORBIDDEN);
     });
@@ -198,14 +200,15 @@ describe('PUT /booking', () => {
       const ticketType = await createTicketTypeWithHotel();
       await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
       const hotel = await createHotelsWithRooms();
-      const room = await createHotelRooms(hotel.id);
-      const booking = await createBooking(room.id, user.id);
-      const newRoom = await createHotelRooms(hotel.id, 0);
+      const room1 = await createHotelRooms(hotel.id);
+      const room2 = await createHotelRooms(hotel.id, 0);
+      const booking = await createBooking(room1.id, user.id);
+      await updateRoomCapacity(room1.id, true);
 
       const { statusCode } = await server
         .put(`/booking/${booking.id}`)
         .set('Authorization', `Bearer ${token}`)
-        .send({ roomId: newRoom.id });
+        .send({ roomId: room2.id });
 
       expect(statusCode).toBe(httpStatus.FORBIDDEN);
     });
